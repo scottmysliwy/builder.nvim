@@ -27,6 +27,7 @@ local function execute_and_display2(command)
 end
 
 
+
 local function execute_and_display(command)
   local temp_file = os.tmpname()
   local output_file = temp_file .. "_command_output.txt"
@@ -38,7 +39,7 @@ local function execute_and_display(command)
     telescope.find_files({
       prompt_title = "Command Output",
       cwd = vim.fn.fnamemodify(output_file, ":h"),
-      find_command = {"find", "-type", "f", "-name", vim.fn.fnamemodify(output_file, ":t")},
+      find_command = { "find", "-type", "f", "-name", vim.fn.fnamemodify(output_file, ":t") },
       attach_mappings = function(prompt_bufnr)
         actions.select_default:replace(function()
           local entry = action_state.get_selected_entry()
@@ -50,10 +51,9 @@ local function execute_and_display(command)
       end
     })
   else
-    print("No output file found")
+    print("Command output file not found.")
   end
-
-
+end
 
 
 
