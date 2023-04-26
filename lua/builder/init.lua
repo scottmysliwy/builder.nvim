@@ -1,45 +1,34 @@
 -- builder.lua
 
+
 local telescope = require("telescope.builtin")
+local actions = require("telescope.actions")
+local action_state = require("telescope.actions.state")
 local build_json = vim.fn.json_decode(vim.fn.readfile(".build.json"))
 
-local function execute_command(cmd)
-  vim.cmd("enew | terminal " .. cmd)
-end
+local function execute_and_display(command)
+  local output_file = "/tmp/command_output.txt"
+  os.execute(command .. " > " .. output_file .. " 2>&1")
 
-local function select_command(commands)
-  local items = {}
+  telescope.find_files({
+    prompt_title = "Command Output",
+    cwd = "/tmp",
+    find_command = { "find", "-type", "f", "-name", "command_output.txt" },
+    attach_mappings = function(prompt_bufnr)
+      actions.select_default:replace(function()
+        local entry = action_state.get_selected_entry()
+        actions.close(prompt_bufnr)
+        vim.cmd("edit " .. entry.path)
+      end)
 
-  for _, cmd in ipairs(commands) do
-    table.insert(items, {
-      display = cmd,
-      cmd = cmd
-    })
-  end
-
-  telescope
-      .select_prompt({
-        prompt_title = "Select a command",
-        finder = function()
-          return items
-        end,
-        sorter = function()
-          return true
-        end,
-        attach_mappings = function(_, map)
-          map("i", "<CR>", function(prompt_bufnr)
-            local selection = telescope.actions.get_selected_entry(prompt_bufnr)
-            execute_command(selection.cmd)
-            return true
-          end)
-          return true
-        end,
-      })
+      return true
+    end
+  })
 end
 
 local function build()
   if not vim.tbl_isempty(build_json.build) then
-    select_command(build_json.build)
+    execute_and_display(build_json.build)
   else
     print("Build command not found in build.json")
   end
@@ -47,7 +36,7 @@ end
 
 local function run()
   if not vim.tbl_isempty(build_json.run) then
-    select_command(build_json.run)
+    execute_and_display(build_json.run)
   else
     print("Run command not found in build.json")
   end
@@ -55,7 +44,7 @@ end
 
 local function test()
   if not vim.tbl_isempty(build_json.test) then
-    select_command(build_json.test)
+    execute_and_display(build_json.test)
   else
     print("Test command not found in build.json")
   end
@@ -66,4 +55,3 @@ return {
   run = run,
   test = test,
 }
-
