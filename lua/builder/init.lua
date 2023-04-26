@@ -26,9 +26,10 @@ local function execute_and_display(command)
   })
 end
 
+
 local function build()
   if not vim.tbl_isempty(build_json.build) then
-    execute_and_display(build_json.build)
+    execute_and_display(table.concat(build_json.build, " "))
   else
     print("Build command not found in build.json")
   end
@@ -36,7 +37,7 @@ end
 
 local function run()
   if not vim.tbl_isempty(build_json.run) then
-    execute_and_display(build_json.run)
+    execute_and_display(table.concat(build_json.run, " "))
   else
     print("Run command not found in build.json")
   end
@@ -44,11 +45,13 @@ end
 
 local function test()
   if not vim.tbl_isempty(build_json.test) then
-    execute_and_display(build_json.test)
+    execute_and_display(table.concat(build_json.test, " "))
   else
     print("Test command not found in build.json")
   end
 end
+
+
 
 return {
   build = build,
